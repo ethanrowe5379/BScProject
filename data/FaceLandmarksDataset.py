@@ -19,6 +19,9 @@ class FaceLandmarksDataset(Dataset):
         self.landmarks_frame = pd.read_csv(csv_file)
         self.root_dir = root_dir
         self.transform = transform
+        print(self.landmarks_frame)
+        print(self.root_dir)
+        print(self.transform)
 
     def __len__(self):
         return len(self.landmarks_frame)
