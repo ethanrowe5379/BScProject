@@ -6,10 +6,7 @@ from Models.LMgen import LandmarkGenNet
 
 ############################################################################################
 
-if(torch.cuda.is_available()):
-    torch.device("cuda")
-else:
-    torch.device("cpu")
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 ############################################################################################
 
@@ -17,12 +14,12 @@ training_data = Wloader(pt_files='data/300W/01_Indoor/',
                         img_dir='data/300W/01_Indoor/',
                         root_dir='data/300W/01_Indoor/')
 
-print(training_data[0])
-
-trainloader = torch.utils.data.DataLoader(training_data, batch_size=1,
+trainloader = torch.utils.data.DataLoader(training_data, batch_size=10,
                                           shuffle=True, num_workers=0)
 
+
 net = LandmarkGenNet()
+net.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
@@ -32,14 +29,12 @@ for epoch in range(2):  # loop over the dataset multiple times
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
         # get the inputs; data is a list of [inputs, labels]
-        inputs, labels = data
-
         # zero the parameter gradients
         optimizer.zero_grad()
 
         # forward + backward + optimize
-        outputs = net(inputs)
-        loss = criterion(outputs, labels)
+        outputs = net(data['image'].to(device))
+        loss = criterion(outputs, data['landmarks'].to(device))
         loss.backward()
         optimizer.step()
 

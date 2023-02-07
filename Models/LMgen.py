@@ -11,14 +11,20 @@ class LandmarkGenNet(nn.Module):
     def __init__(self):
         super().__init__()
         # input image channel, output channels, square convolution
-        self.Conv1 = nn.Conv2d(3,16,5)
-        # Max pooling over a (2, 2) window
-        self.pool = nn.MaxPool2d(2, 2)
+        # kernel
+        self.Conv1 = nn.Conv2d(512, 256, 3, padding=2)
+        self.Conv2 = nn.Conv2d(256, 128, 3, padding=2)
+        self.Conv3 = nn.Conv2d(128, 64, 3, padding=2)
+        self.pool = nn.MaxPool2d(3, 2)
         # an affine operation: y = Wx + b
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-
+        # (activation shape, activation size)
+        self.fc1 = nn.Linear(64, 192)# 5*5 from image dimension
+        #self.fc2 = nn.Linear(120, 84)  # 5*5 from image dimension
+        #self.fc3 = nn.Linear(84, 64)
     def forward(self, x):
         x = self.pool(F.relu(self.Conv1(x)))
-        x = torch.flatten(x,1)
-        x = self.fc1(x)
+        x = self.pool(F.relu(self.Conv2(x)))
+        x = self.pool(F.relu(self.Conv3(x)))
+        x = torch.flatten(x, 2)
+        x = F.relu(self.fc1(x))
         return x
