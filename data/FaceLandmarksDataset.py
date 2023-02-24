@@ -1,9 +1,9 @@
 import torch
 import os
 import numpy as np
-from skimage import io, transform
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
+import matplotlib.image as mpimg
 
 class FaceLandmarksDataset(Dataset):
     """Face Landmarks dataset."""
@@ -32,14 +32,21 @@ class FaceLandmarksDataset(Dataset):
 
         img_name = os.path.join(self.root_dir,
                                 self.landmarks_frame.iloc[idx, 0])
-        image = io.imread(img_name)
-        landmarks = self.landmarks_frame.iloc[idx, 1:]
-        landmarks = np.array([landmarks])
+        image = mpimg.imread(img_name)
+
+        # if image has an alpha color channel, get rid of it
+        if (image.shape[2] == 4):
+            image = image[:, :, 0:3]
+
+        image = image/255
+
+        landmarks = self.landmarks_frame.iloc[idx, 1:].values
         landmarks = landmarks.astype('float').reshape(-1, 2)
+        landmarks = (landmarks - 100)/50.0
         sample = {'image': image, 'landmarks': landmarks}
 
-        if self.transform:
-            sample = self.transform(sample)
+        #if self.transform:
+            #sample = self.transform(sample)
 
         return sample
 

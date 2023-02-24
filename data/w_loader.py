@@ -33,15 +33,15 @@ class Rescale(object):
 
         new_h, new_w = int(new_h), int(new_w)
 
-        img = transform.resize(image, (new_h, new_w))
+        img = transform.resize(image, (3, new_h, new_w))
         img = np.float32(img)
         img = torch.tensor(img)
         # h and w are swapped for landmarks because for images,
         # x and y axes are axis 1 and 0 respectively
         lm = np.array(landmarks)
         lm = lm * [new_w / w, new_h / h]
-        lm = np.float32(lm)
         lm = torch.tensor(lm)
+        lm = lm.squeeze(0)
 
         return {'image': img, 'landmarks': lm}
 
