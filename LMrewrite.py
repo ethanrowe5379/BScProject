@@ -41,12 +41,10 @@ testingloader = torch.utils.data.DataLoader(training_data, batch_size=5,
 net = LandmarkGenNet()
 
 criterion = nn.L1Loss()
-optimizer = optim.SGD(net.parameters(), lr=0.001)
+optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 scheduler = ExponentialLR(optimizer, gamma=0.9)
 
 ############################################################################################
-
-images, landmarks = next(iter(trainloader))
 
 for epoch in range(5):  # loop over the dataset multiple times
     print(f"Epoch {epoch + 1}\n-------------------------------")
@@ -56,22 +54,23 @@ for epoch in range(5):  # loop over the dataset multiple times
         # Inputs
         inputs = data['image'][i].requires_grad_()
         target = data['landmarks'][i].requires_grad_()
+        #target = torch.flatten(target)
         # forward + backward + optimize
         outputs = net(inputs)
-        # loss = criterion(outputs[0], target)
-        # loss.backward()
-        # torch.nn.utils.clip_grad_norm_(net.parameters(), 10)
-        # optimizer.step()
+        loss = criterion(outputs, target)
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(net.parameters(), 10)
+        optimizer.step()
         #
-        # # Running loss
-        # running_loss += loss.item()
-        # print(f'[{i + 1}] loss: {running_loss / 5:.3f}')
-        # running_loss = 0.0
+        # Running loss
+        running_loss += loss.item()
+        print(f'[{i + 1}] loss: {running_loss / 5:.3f}')
+        running_loss = 0.0
         #
-        # if i == 4:
-        #     break
+        if i == 4:
+            break
     #
-    # scheduler.step()
+    scheduler.step()
 
 ############################################################################################
 

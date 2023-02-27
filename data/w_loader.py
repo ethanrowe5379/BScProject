@@ -5,6 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import pandas as pd
 from skimage import io, transform
+import torch.nn.functional as F
 
 class Rescale(object):
     """Rescale the image in a sample to a given size.
@@ -36,12 +37,14 @@ class Rescale(object):
         img = transform.resize(image, (3, new_h, new_w))
         img = np.float32(img)
         img = torch.tensor(img)
+        img = F.normalize(img, p=2.0, dim=1, eps=1e-12, out=None)
         # h and w are swapped for landmarks because for images,
         # x and y axes are axis 1 and 0 respectively
         lm = np.array(landmarks)
         lm = lm * [new_w / w, new_h / h]
         lm = torch.tensor(lm)
         lm = lm.squeeze(0)
+        lm = F.normalize(lm, p=2.0, dim=1, eps=1e-12, out=None)
 
         return {'image': img, 'landmarks': lm}
 

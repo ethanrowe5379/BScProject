@@ -3,7 +3,7 @@ import os
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
-import matplotlib.image as mpimg
+from skimage import io, transform
 
 class FaceLandmarksDataset(Dataset):
     """Face Landmarks dataset."""
@@ -32,7 +32,7 @@ class FaceLandmarksDataset(Dataset):
 
         img_name = os.path.join(self.root_dir,
                                 self.landmarks_frame.iloc[idx, 0])
-        image = mpimg.imread(img_name)
+        image = io.imread(img_name)
 
         # if image has an alpha color channel, get rid of it
         if (image.shape[2] == 4):
